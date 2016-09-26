@@ -3,7 +3,7 @@
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
-angular.module('starter', ['ionic', 'ngMap'])
+angular.module('starter', ['ionic', 'ngMap', 'ngCordova'])
 
 .run(function($ionicPlatform) {
     $ionicPlatform.ready(function() {
@@ -23,6 +23,16 @@ angular.module('starter', ['ionic', 'ngMap'])
     });
 })
 
-.controller('MapCtrl', function($scope) {
+.controller('MapCtrl', function($scope, $cordovaGeolocation) {
     console.log('En MapCtrl');
+    var posOptions = { timeout: 10000, enableHighAccuracy: true };
+    $scope.coord = {};
+    $cordovaGeolocation
+        .getCurrentPosition(posOptions)
+        .then(function(position) {
+            $scope.coord.lat = position.coords.latitude
+            $scope.coord.long = position.coords.longitude
+        }, function(err) {
+            console.log('error', err);
+        });
 })
