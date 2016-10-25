@@ -6,33 +6,57 @@
 angular.module('starter', ['ionic', 'ngMap', 'ngCordova'])
 
 .run(function($ionicPlatform) {
-    $ionicPlatform.ready(function() {
-        if (window.cordova && window.cordova.plugins.Keyboard) {
-            // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
-            // for form inputs)
-            cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+  $ionicPlatform.ready(function() {
+    if (window.cordova && window.cordova.plugins.Keyboard) {
+      // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
+      // for form inputs)
+      cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
 
-            // Don't remove this line unless you know what you are doing. It stops the viewport
-            // from snapping when text inputs are focused. Ionic handles this internally for
-            // a much nicer keyboard experience.
-            cordova.plugins.Keyboard.disableScroll(true);
-        }
-        if (window.StatusBar) {
-            StatusBar.styleDefault();
-        }
-    });
+      // Don't remove this line unless you know what you are doing. It stops the viewport
+      // from snapping when text inputs are focused. Ionic handles this internally for
+      // a much nicer keyboard experience.
+      cordova.plugins.Keyboard.disableScroll(true);
+    }
+    if (window.StatusBar) {
+      StatusBar.styleDefault();
+    }
+  });
 })
 
+// .factory('NetworkMonitor', function($rootScope, $cordovaNetwork) {
+//   return {
+//     isOnline: function() {
+//       return $cordovaNetwork.isOnline();
+//     },
+//     isOffline: function () {
+//       return $cordovaNetwork.isOffline();
+//     }
+//   }
+// })
+
 .controller('MapCtrl', function($scope, $cordovaGeolocation) {
-    console.log('En MapCtrl');
-    var posOptions = { timeout: 10000, enableHighAccuracy: true };
+  console.log('En MapCtrl');
+  if ($cordovaNetwork.isOffline()) {
+    console.log('sin internet');
+    $ionicLoading.show({
+      template: 'You must be connected to the Internet to view this map.'
+    });
+  } else {
+    console.log('tudo ben');
+    var posOptions = {
+      timeout: 10000,
+      enableHighAccuracy: true
+    };
+
     $scope.coord = {};
+
     $cordovaGeolocation
-        .getCurrentPosition(posOptions)
-        .then(function(position) {
-            $scope.coord.lat = position.coords.latitude
-            $scope.coord.long = position.coords.longitude
-        }, function(err) {
-            console.log('error', err);
-        });
+      .getCurrentPosition(posOptions)
+      .then(function(position) {
+        $scope.coord.lat = position.coords.latitude
+        $scope.coord.long = position.coords.longitude
+      }, function(err) {
+        console.log('error', err);
+      });
+  }
 })
