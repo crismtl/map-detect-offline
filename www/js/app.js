@@ -23,26 +23,31 @@ angular.module('starter', ['ionic', 'ngMap', 'ngCordova'])
   });
 })
 
-// .factory('NetworkMonitor', function($rootScope, $cordovaNetwork) {
-//   return {
-//     isOnline: function() {
-//       return $cordovaNetwork.isOnline();
-//     },
-//     isOffline: function () {
-//       return $cordovaNetwork.isOffline();
-//     }
-//   }
-// })
-
-.controller('MapCtrl', function($scope, $cordovaGeolocation) {
+.controller('MapCtrl', function($scope, $cordovaGeolocation, $cordovaNetwork, $rootScope, $ionicLoading) {
   console.log('En MapCtrl');
-  if ($cordovaNetwork.isOffline()) {
-    console.log('sin internet');
-    $ionicLoading.show({
-      template: 'You must be connected to the Internet to view this map.'
+  var posOptions = {
+    timeout: 10000,
+    enableHighAccuracy: true
+  };
+
+  $scope.coord = {};
+
+  $cordovaGeolocation
+    .getCurrentPosition(posOptions)
+    .then(function(position) {
+      $scope.coord.lat = position.coords.latitude
+      $scope.coord.long = position.coords.longitude
+    }, function(err) {
+      console.log('error', err);
     });
-  } else {
-    console.log('tudo ben');
+
+// TODO: refactorizar con servicio o factory las funciones de network
+  $rootScope.$on('$cordovaNetwork:online', function(event, networkState) {
+    $ionicLoading.hide();
+    console.log('con conexión');
+    var onlineState = networkState;
+    console.log('event', event);
+    console.log('networkState', networkState);
     var posOptions = {
       timeout: 10000,
       enableHighAccuracy: true
@@ -58,5 +63,17 @@ angular.module('starter', ['ionic', 'ngMap', 'ngCordova'])
       }, function(err) {
         console.log('error', err);
       });
-  }
+  })
+
+  $rootScope.$on('$cordovaNetwork:offline', function(event, networkState) {
+    $ionicLoading.show({
+      template: 'You must be connected to the Internet to view this map.'
+    });
+    var offlineState = networkState;
+    console.log('event', event);
+    console.log('networkState', networkState);
+    if (networkState === 'none') {
+      console.log('se te fue el inter');
+    }
+  })
 })
